@@ -1,0 +1,12 @@
+name: coronaBrazil
+title: coronaBrazil
+username:
+account: covid19brazil
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2130385
+bundleId: 3056645
+url: https://covid19brazil.shinyapps.io/coronaBrazil/
+when: 1587675109.42321
+asMultiple: FALSE
+asStatic: FALSE
