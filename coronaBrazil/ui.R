@@ -58,6 +58,7 @@ shinyUI(
    tabsetPanel(type = "tabs",
    
    tabPanel("Sobre",fluidRow(column(width = 12, offset =0,
+                tags$br(),                    
                 infoBoxOutput("confirmed"),
                 infoBoxOutput("progressBox"),
                 infoBoxOutput("approvalBox"),)),
@@ -79,7 +80,7 @@ shinyUI(
               fluidRow( textOutput("war"),
               column(width = 5, offset = 2,
               selectInput("graph", "Variable:",
-              c("Confirmed" = "conf","Death" = "dea"))),
+              c("Confirmados" = "conf","Mortos" = "dea"))),
               plotlyOutput("confirPlot", width = "800px", height = "600px"))),
     
     tabPanel("Estados",plotlyOutput("hourlyPlot", width = "800px", height = "600px")),

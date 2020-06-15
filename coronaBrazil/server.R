@@ -75,13 +75,13 @@ shinyServer(function(input, output) {
     output$hourlyPlot <- renderPlotly({
         
         g<-corona %>%
-            dplyr::filter(state %in% c("SP", "RJ", "MG", "RS", "RN")) %>%
+            dplyr::filter(state %in% c("SP", "RJ", "CE", "PA", "MA", "AM", "PE", "BA",  "PB", "ES", "DF", "AL", "MG", "AP", "RS", "RN", "SC", "SE", "RO", "PI", "AC", "PR", "GO", "TO", "RR", "MT", "MS")) %>%
             group_by(date) %>%
             #top_n(1, confirmed) %>%
             #ggplot(mtcars, aes(wt, mpg)) %>%
             ggplot(., aes(x = date, y = confirmed, group = state, colour = state)) +
             labs(x = "Data", y = "Casos Confirmados", colour = "Estado") +
-            scale_colour_viridis_d()  +
+            scale_colour_hue()  +
             geom_line() +
             theme_bw() 
 
@@ -172,8 +172,7 @@ shinyServer(function(input, output) {
             arrange(desc(confirmed)) %>%
             select(date, state, confirmed, deaths, death_rate, confirmed_per_100k_inhabitants) 
         
-        datatable(h, 
-                  options = list(pageLenght = 5)
+        datatable(h, options = list(pageLenght = 5)
         ) 
     })
     
@@ -187,36 +186,27 @@ shinyServer(function(input, output) {
        # hoje <-hoje -1
       #}
       
-      if(input$variable == "con100")
-      {
+      if(input$variable == "con100"){
         h<-corona %>%
           dplyr::filter(date==hoje) %>%
-          select(confirmed_per_100k_inhabitants,state)
+          select(confirmed_per_100k_inhabitants, state)
+       
+        pal <- colorNumeric(
+          palette = "Paired",
+          domain = h$confirmed_per_100k_inhabitants)
       
-      
-      pal <- colorNumeric(
-        palette = "Paired",
-        domain = h$confirmed_per_100k_inhabitants
-      )
-      
-      mapa <- leaflet(h) %>% addTiles()
-      mapa %>%
-        addPolygons(data=shape_br,weight=1,col = ~pal(h$confirmed_per_100k_inhabitants),
-                    highlightOptions = highlightOptions(color = "blue", weight = 3,
-                                                        bringToFront = TRUE),
-                    label = ~paste(h$state, h$confirmed_per_100k_inhabitants)
-                    ) %>%
-        
-        
-        
-        addLegend("bottomright", pal = pal, values = h$confirmed_per_100k_inhabitants,
-                  title = "Infec. 100k",
-                  #labFormat = labelFormat(prefix = "$"),
-                  opacity = 1)
-      
-      
-      }else if(input$variable == "dea")
-      {
+        mapa <- leaflet(h) %>% addTiles()
+        mapa %>% addPolygons(data=shape_br,weight=1,col = ~pal(h$confirmed_per_100k_inhabitants),
+                      highlightOptions = highlightOptions(color = "blue", weight = 3, bringToFront = TRUE),
+                      label = ~paste(h$state, h$confirmed_per_100k_inhabitants)) %>%
+  
+                 addLegend("bottomright", pal = pal, values = h$confirmed_per_100k_inhabitants,
+                            title = "Infec. 100k",
+                            #labFormat = labelFormat(prefix = "$"),
+                            opacity = 1)
+
+      }
+      else if(input$variable == "dea"){
         
         hoje <- ymd(input$Date)
         h<-corona %>%
@@ -231,8 +221,7 @@ shinyServer(function(input, output) {
         mapa <- leaflet(h) %>% addTiles()
         mapa %>%
           addPolygons(data=shape_br,weight=1,col = ~pal(h$deaths),
-                      highlightOptions = highlightOptions(color = "blue", weight = 3,
-                                                          bringToFront = TRUE),
+                      highlightOptions = highlightOptions(color = "blue", weight = 3, bringToFront = TRUE),
                       label = ~paste(h$state, h$deaths)) %>%
           
           addLegend("bottomright", pal = pal, values = h$deaths,
@@ -292,12 +281,12 @@ shinyServer(function(input, output) {
         if((confirmedDay - confirmedDay_yes)<0)
         {
            valueBox(
-                paste0("Ind"), "Deaths Day",
+                paste0("Ind"), "Mortes/dia",
                 color = "blue"
             )
         }else{
             valueBox(
-                paste0(confirmedDay - confirmedDay_yes), "Deaths Day", 
+                paste0(confirmedDay - confirmedDay_yes), "Mortes/dia", 
                 color = "blue"
             )
         }
@@ -310,7 +299,7 @@ shinyServer(function(input, output) {
             summarise(confirm = sum(confirmed))
         
         valueBox(
-            paste0(confirmed), "Confirmed",
+            paste0(confirmed), "Casos Confirmados",
             color = "red"
         )
     })
@@ -336,7 +325,7 @@ shinyServer(function(input, output) {
       a<-NROW(confirmed)
       
       if(a<27){
-        print("WARNING MESSAGE - Dados imcompletos do dia!Verifique o dia anterior.", col = "red")
+        print("WARNING MESSAGE - Dados imcompletos do dia! Verifique o dia anterior.", col = "red")
       }
       
     })
