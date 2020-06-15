@@ -32,7 +32,7 @@ library(leaflet)
 
 # Mapa do Brasil
 #install.packages('brazilmaps')
-library(brazilmaps)
+#library(brazilmaps)
 
 #install.packages('rsconnect')
 #library(rsconnect)
@@ -56,27 +56,22 @@ corona <- read.csv(file="https://brasil.io/dataset/covid19/caso?format=csv")
 corona <- as_tibble(corona)
 
 # transformar coluna `date` em data
-
 corona <- corona %>% 
     mutate(date = ymd(date))
 
 # transformar a coluna `is_last` em logical
-
 corona <- corona %>% 
     mutate(is_last = ifelse(is_last == "True", TRUE, FALSE))
 
 # remover as linhas com totais por cidade
-
 corona <- corona %>% 
     dplyr::filter(place_type == "state")
 
-arquivo = "./shapes"
 
+arquivo = "./shapes"
 shape_br <- readOGR(arquivo, "estados", GDAL1_integer64_policy = TRUE)
 
-
 shinyServer(function(input, output) {
-    
     output$hourlyPlot <- renderPlotly({
         
         g<-corona %>%
@@ -89,15 +84,12 @@ shinyServer(function(input, output) {
             scale_colour_viridis_d()  +
             geom_line() +
             theme_bw() 
-        
-        
-        
+
         ggplotly() 
         
     })
     
     output$confirPlot <- renderPlotly({
-      
       if(input$graph=="conf")
       {
         confi<-corona %>%
@@ -105,9 +97,7 @@ shinyServer(function(input, output) {
             summarise(confirm = sum(confirmed))
         
         a<-NROW(confi)
-        
         #confi$confirm[a]
-        
         if((confi$confirm[a]) < confi$confirm[a-2] )
         {
             confirmedDe<-corona %>%
@@ -142,7 +132,6 @@ shinyServer(function(input, output) {
           summarise(confirm = sum(deaths))
         
         a<-NROW(confi)
-        
         #confi$confirm[a]
         
         if((confi$confirm[a]) < confi$confirm[a-2] )
@@ -178,7 +167,6 @@ shinyServer(function(input, output) {
     output$employTable <- renderDT({
         
         hoje <- ymd(input$Date)
-        
         h<- corona %>%
             dplyr::filter(date == hoje) %>%
             arrange(desc(confirmed)) %>%
@@ -248,7 +236,7 @@ shinyServer(function(input, output) {
                       label = ~paste(h$state, h$deaths)) %>%
           
           addLegend("bottomright", pal = pal, values = h$deaths,
-                    title = "Deaths",
+                    title = "Mortes",
                     #labFormat = labelFormat(prefix = "$"),
                     opacity = 1)
         
@@ -273,7 +261,7 @@ shinyServer(function(input, output) {
                       label = ~paste(h$state, h$confirmed)) %>%
           
           addLegend("bottomright", pal = pal, values = h$confirmed,
-                    title = "Confirmed",
+                    title = "Confirmados",
                     #labFormat = labelFormat(prefix = "$"),
                     opacity = 1)
         
@@ -287,7 +275,7 @@ shinyServer(function(input, output) {
             summarise(confirm = sum(deaths))
         
         valueBox(
-            paste0(confirmedDay), "Deaths Confirmed", 
+            paste0(confirmedDay), "Mortes Confirmadas", 
             color = "purple"
         )
     })
@@ -334,12 +322,8 @@ shinyServer(function(input, output) {
       
       a<-NROW(confirmed)
       
-      if(a<27)
-      {
+      if(a<27){
         print("WARNING MESSAGE - Dados impletos! Verifique a tabela!", col = "red")
-        
-        
-      
       }
       
     })
@@ -351,16 +335,10 @@ shinyServer(function(input, output) {
       
       a<-NROW(confirmed)
       
-      if(a<27)
-      {
-        print("WARNING MESSAGE - Dados impletos do dia!Verifique o dia anterior.", col = "red")
-        
-        
-        
+      if(a<27){
+        print("WARNING MESSAGE - Dados imcompletos do dia!Verifique o dia anterior.", col = "red")
       }
       
     })
-    
-    
 
 })

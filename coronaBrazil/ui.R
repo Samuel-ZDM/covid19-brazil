@@ -46,78 +46,49 @@ library(leaflet)
 
 
 
-options(shiny.sanitize.errors = FALSE)
+##options(shiny.sanitize.errors = FALSE)
 
 
 
 shinyUI( 
-        dashboardPage(dashboardHeader(title = "COVID-19 BRAZIL"),
-                      
-                      dashboardSidebar(dateInput("Date", label = "Input Date", 
-                                                 value = Sys.Date())
-                      ),
-                      
-                      dashboardBody(
-                       mainPanel(tabsetPanel(type = "tabs",
-                                                          tabPanel("Menu",
-                                                                   fluidRow(column(width = 12, offset =0,
-                                                                     infoBoxOutput("confirmed"),
-                                                                     infoBoxOutput("progressBox"),
-                                                                     infoBoxOutput("approvalBox"),
-                                                                     
-                                                                            
-                                                                     
-                                                                   )
-                                                                   ),
-                                                                   
-                                                                   
-                                                                   h1("COVID-19 NO BRASIL", align = "center"),
-                                                                   p("Esta aplicação visa mostrar a evolução e
-                                                                    o atual estado do coronavirus no Brasil."),
-                                                                   p("Os dados são obtidos do seguinte data set:",
-                                                                     span("https://brasil.io/home/", style = "color:blue")),
-                                                                   p("Informações sobre o coronavírus no Brasil:",
-                                                                     span("https://coronavirus.saude.gov.br", style = "color:blue")),
-                                                                   p("Plataforma do Governo com dados bem detalhados sobre infectados, 
-                                                                    pessoas hospitalizadas e insumos utilizados:",
-                                                                     span("https://covid.saude.gov.br", style = "color:blue")),
-                                                                   h4("Os dados podem estar incompletos. Isso depende da atualização do banco de dados.
-                                                                     Eles estarão incompletos quando o infobox Deaths Day estiver IND."),
-                                                                   h4("Escolha a data no sidebar para verificar a evolução da doença no mapa, 
-                                                                       na tabela e nos infobox, até a data escolhida.")
-                                                                    
-                                                                   
-                                                          ),
-                                                          tabPanel( "All",
-                                                                   
-                                                                    fluidRow( textOutput("war"),
-                                                                              column(width = 3, offset = 1,
-                                                                                      selectInput("graph", "Variable:",
-                                                                                                  c("Confirmed" = "conf",
-                                                                                                    "Death" = "dea"
-                                                                                                        )) ),
-                                                                               plotlyOutput("confirPlot", height = "50%"))
-                                                                            ),
-                                                          tabPanel("Plot",
-                                                                   plotlyOutput("hourlyPlot",height = "80%")
-                                                          ),
-                                             tabPanel( "Map", 
-                                                       fluidRow(column(width = 9, textOutput("warnmsg"),
-                                                                       leafletOutput("map")),
-                                                                column(width = 3,
-                                                                       selectInput("variable", "Variable:",
-                                                                                   c("Confirmed100k" = "con100",
-                                                                                     "Death" = "dea",
-                                                                                     "Confirmed" = "conf")),
-                                                                       ),
-                                                                
-                                                                                 
-                                                                
-                                                                ),
-                                                       ),
-                                                          tabPanel("Table", DTOutput("employTable"))))
-                                    
-                                   
-                                    
-                      )
-))
+  dashboardPage(dashboardHeader(title = "COVID-19 BRAZIL"),
+  dashboardSidebar(dateInput("Date", label = "Data", value = Sys.Date())),
+  dashboardBody(mainPanel(
+   
+   tabsetPanel(type = "tabs",
+   
+   tabPanel("Sobre",fluidRow(column(width = 12, offset =0,
+                infoBoxOutput("confirmed"),
+                infoBoxOutput("progressBox"),
+                infoBoxOutput("approvalBox"),)),
+                
+                
+                h1("COVID-19 NO BRASIL", align = "center"),
+                p("Esta aplicacao visa mostrar a evolucao e o atual estado do coronavirus no Brasil."),
+                p("Os dados sao obtidos do seguinte data set:",
+                  tags$a(href="https://brasil.io/home/", "https://brasil.io/home/", style = "color:blue")),
+                p("Informacoes sobre o coronavirus no Brasil:",
+                  tags$a(href="https://coronavirus.saude.gov.br", "https://coronavirus.saude.gov.br", style = "color:blue")),
+                p("Plataforma do Governo com dados bem detalhados sobre infectados, pessoas hospitalizadas e insumos utilizados:",
+                  tags$a(href="https://covid.saude.gov.br", "https://covid.saude.gov.br", style = "color:blue")),
+                 
+                h4("Os dados podem estar incompletos. Isso depende da atualizacao do banco de dados."),
+                h4("Escolha a data no sidebar para verificar a evolucao da doenca no mapa, na tabela e nos infobox, ate a data escolhida.")),
+    
+    tabPanel( "Total",
+              fluidRow( textOutput("war"),
+              column(width = 5, offset = 2,
+              selectInput("graph", "Variable:",
+              c("Confirmed" = "conf","Death" = "dea"))),
+              plotlyOutput("confirPlot", width = "800px", height = "600px"))),
+    
+    tabPanel("Estados",plotlyOutput("hourlyPlot", width = "800px", height = "600px")),
+    
+    tabPanel("Mapa",fluidRow(column(width = 9, 
+                    textOutput("warnmsg"),
+                    leafletOutput("map", width = "800px", height = "600px")),
+                    column(width = 5,
+                    selectInput("variable", "Variaveis:",c("Confirmados/100000" = "con100","Mortes" = "dea","Confirmados" = "conf")),),),),
+   
+    tabPanel("Dados", DTOutput("employTable")))))
+  ))
