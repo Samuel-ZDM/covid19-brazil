@@ -74,6 +74,7 @@ shape_br <- readOGR(arquivo, "estados", GDAL1_integer64_policy = TRUE)
 shinyServer(function(input, output) {
     output$hourlyPlot <- renderPlotly({
         
+      if(input$graph2 == "conf2"){
         g<-corona %>%
             dplyr::filter(state %in% c("SP", "RJ", "CE", "PA", "MA", "AM", "PE", "BA",  "PB", "ES", "DF", "AL", "MG", "AP", "RS", "RN", "SC", "SE", "RO", "PI", "AC", "PR", "GO", "TO", "RR", "MT", "MS")) %>%
             group_by(date) %>%
@@ -87,6 +88,27 @@ shinyServer(function(input, output) {
 
         ggplotly() 
         
+
+        }
+        else if(input$graph2 == "dea2") {
+
+          g<-corona %>%
+              dplyr::filter(state %in% c("SP", "RJ", "CE", "PA", "MA", "AM", "PE", "BA",  "PB", "ES", "DF", "AL", "MG", "AP", "RS", "RN", "SC", "SE", "RO", "PI", "AC", "PR", "GO", "TO", "RR", "MT", "MS")) %>%
+              group_by(date) %>%
+              #top_n(1, confirmed) %>%
+              #ggplot(mtcars, aes(wt, mpg)) %>%
+              ggplot(., aes(x = date, y = deaths, group = state, colour = state)) +
+              labs(x = "Data", y = "Casos Confirmados", colour = "Estado") +
+              scale_colour_hue()  +
+              geom_line() +
+              theme_bw()
+
+            ggplotly()
+
+          
+        }
+        
+
     })
     
     output$confirPlot <- renderPlotly({
@@ -191,6 +213,20 @@ shinyServer(function(input, output) {
           dplyr::filter(date==hoje) %>%
           select(confirmed_per_100k_inhabitants, state)
        
+        #  n <- "gg"
+        #   if(NROW(h) < 27){
+        #for(i in estados){
+        # for(j in h$state){
+        #  if(i == j){
+        #    j <- i
+        #  }
+        #  n <- i
+        #}
+        #  }
+        
+        #    }
+        
+        
         pal <- colorNumeric(
           palette = "Paired",
           domain = h$confirmed_per_100k_inhabitants)
@@ -281,12 +317,12 @@ shinyServer(function(input, output) {
         if((confirmedDay - confirmedDay_yes)<0)
         {
            valueBox(
-                paste0("Ind"), "Mortes/dia",
+                paste0("Ind"), "Mortes no dia",
                 color = "blue"
             )
         }else{
             valueBox(
-                paste0(confirmedDay - confirmedDay_yes), "Mortes/dia", 
+                paste0(confirmedDay - confirmedDay_yes), "Mortes no dia", 
                 color = "blue"
             )
         }
