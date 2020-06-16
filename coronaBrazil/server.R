@@ -67,11 +67,67 @@ corona <- corona %>%
 corona <- corona %>% 
     dplyr::filter(place_type == "state")
 
+con <- gzcon(url(paste("https://data.brasil.io/dataset/covid19/caso_full.csv.gz", sep="")))
+txt <- readLines(con)
+coronaDeaths <- read.csv(textConnection(txt))
+
+coronaDeaths <- coronaDeaths %>% 
+  mutate(date = ymd(date))
+
+coronaDeaths <- coronaDeaths %>% 
+  filter(place_type == "state")
+
 
 arquivo = "./shapes"
 shape_br <- readOGR(arquivo, "estados", GDAL1_integer64_policy = TRUE)
 
 shinyServer(function(input, output) {
+  
+  
+  output$deathsforday <- renderPlotly({
+    
+    teste <- coronaDeaths %>%
+      group_by(date) %>%
+      #dplyr::filter(date!=(confi$date[a])) %>%
+      summarise(confirm = sum(new_deaths)) 
+    
+    teste <- teste %>% 
+      #group_by(date) %>%
+      #dplyr::filter(date!=(confi$date[a])) %>%
+      #summarise(confirm = sum(new_deaths)) %>%
+      ggplot(., aes(x = date, y = confirm), colour = "blue") +
+      labs(x = "Data", y = "Mortes no dia", colour = "blue") +
+      scale_colour_viridis_d() +
+      geom_col() +
+      theme_bw() 
+    
+    ggplotly()
+    
+    
+  })
+  
+  output$confirforday<- renderPlotly({
+    
+      teste <- coronaDeaths %>%
+        group_by(date) %>%
+        #dplyr::filter(date!=(confi$date[a])) %>%
+        summarise(confirm = sum(new_confirmed)) 
+      
+      teste <- teste %>% 
+        #group_by(date) %>%
+        #dplyr::filter(date!=(confi$date[a])) %>%
+        #summarise(confirm = sum(new_deaths)) %>%
+        ggplot(., aes(x = date, y = confirm), colour = "blue") +
+        labs(x = "Data", y = "Confirmados no dia", colour = "blue") +
+        scale_colour_viridis_d() +
+        geom_col() +
+        theme_bw() 
+      
+      ggplotly()
+      
+    
+  })
+  
     output$hourlyPlot <- renderPlotly({
         
       if(input$graph2 == "conf2"){

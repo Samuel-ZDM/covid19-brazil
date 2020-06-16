@@ -85,9 +85,11 @@ dashboardPage(
                       h4("Escolha a data no sidebar para verificar a evolução da doença no mapa, na tabela e nos infobox, até a data escolhida.")),
       
      tabItem("total", fluidRow( #textOutput("war"),
-                      column(width = 5, offset = 2,
+                      column(width = 2, offset = 1,
                       selectInput("graph", "Variable:", c("Confirmados" = "conf","Mortos" = "dea"))),
-                      plotlyOutput("confirPlot", width = "800px", height = "600px"))),
+                      plotlyOutput("confirPlot", width = "600px", height = "300px"),
+                      plotlyOutput("deathsforday", width = "600px", height = "300px"),
+                      plotlyOutput("confirforday", width = "600px", height = "300px"))),
       
      tabItem("estados", fluidRow( #textOutput("war2"),
                         column(width = 5, offset = 2,
