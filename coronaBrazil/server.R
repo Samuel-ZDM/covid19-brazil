@@ -21,7 +21,7 @@ library(DT)
 #install.packages('lubridate')
 library(lubridate)
 
-# Para produzir gráficos interativos
+# Para produzir grÃ¡ficos interativos
 library(ggplot2)
 
 library(plotly)
@@ -52,24 +52,24 @@ options(shiny.sanitize.errors = FALSE)
 # 
 # https://brasil.io/dataset/covid19/caso
 
-corona <- read.csv(file="https://brasil.io/dataset/covid19/caso?format=csv")
-corona <- as_tibble(corona)
+#corona <- read.csv(file="https://brasil.io/dataset/covid19/caso?format=csv")
+#corona <- as_tibble(corona)
 
 # transformar coluna `date` em data
-corona <- corona %>% 
-    mutate(date = ymd(date))
+#corona <- corona %>% 
+   # mutate(date = ymd(date))
 
 # transformar a coluna `is_last` em logical
-corona <- corona %>% 
-    mutate(is_last = ifelse(is_last == "True", TRUE, FALSE))
+#corona <- corona %>% 
+   # mutate(is_last = ifelse(is_last == "True", TRUE, FALSE))
 
 # remover as linhas com totais por cidade
-corona <- corona %>% 
-    dplyr::filter(place_type == "state")
+#corona <- corona %>% 
+   # dplyr::filter(place_type == "state")
 
-#NOVO DATASET, DADOS MAIS RECENTES E ATUALIZADOS, MAIS R�PIDO
-#ESTOU TENTANDO MUDAR AS VARI�VEIS PARA ESSE
-#MUDEI OS GR�FICOS E O MAPA
+#NOVO DATASET, DADOS MAIS RECENTES E ATUALIZADOS, MAIS RÁPIDO
+#ESTOU TENTANDO MUDAR AS VARIÁVEIS PARA ESSE
+#MUDEI OS GRÁFICOS E O MAPA
 
 
 con <- gzcon(url(paste("https://data.brasil.io/dataset/covid19/caso_full.csv.gz", sep="")))
@@ -136,12 +136,12 @@ shinyServer(function(input, output) {
     output$hourlyPlot <- renderPlotly({
         
       if(input$graph2 == "conf2"){
-        g<-corona %>%
+        g<-coronaDeaths %>%
             dplyr::filter(state %in% c("SP", "RJ", "CE", "PA", "MA", "AM", "PE", "BA",  "PB", "ES", "DF", "AL", "MG", "AP", "RS", "RN", "SC", "SE", "RO", "PI", "AC", "PR", "GO", "TO", "RR", "MT", "MS")) %>%
             group_by(date) %>%
             #top_n(1, confirmed) %>%
             #ggplot(mtcars, aes(wt, mpg)) %>%
-            ggplot(., aes(x = date, y = confirmed, group = state, colour = state)) +
+            ggplot(., aes(x = date, y = last_available_confirmed, group = state, colour = state)) +
             labs(x = "Data", y = "Casos Confirmados", colour = "Estado") +
             scale_colour_hue()  +
             geom_line() +
@@ -153,13 +153,13 @@ shinyServer(function(input, output) {
         }
         else if(input$graph2 == "dea2") {
 
-          g<-corona %>%
+          g<-coronaDeaths %>%
               dplyr::filter(state %in% c("SP", "RJ", "CE", "PA", "MA", "AM", "PE", "BA",  "PB", "ES", "DF", "AL", "MG", "AP", "RS", "RN", "SC", "SE", "RO", "PI", "AC", "PR", "GO", "TO", "RR", "MT", "MS")) %>%
               group_by(date) %>%
               #top_n(1, confirmed) %>%
               #ggplot(mtcars, aes(wt, mpg)) %>%
-              ggplot(., aes(x = date, y = deaths, group = state, colour = state)) +
-              labs(x = "Data", y = "Casos Confirmados", colour = "Estado") +
+              ggplot(., aes(x = date, y = last_available_deaths, group = state, colour = state)) +
+              labs(x = "Data", y = "Mortes confirmadas", colour = "Estado") +
               scale_colour_hue()  +
               geom_line() +
               theme_bw()
@@ -251,10 +251,10 @@ shinyServer(function(input, output) {
     output$employTable <- renderDT({
         
         hoje <- ymd(input$Date)
-        h<- corona %>%
+        h<- coronaDeaths %>%
             dplyr::filter(date == hoje) %>%
-            arrange(desc(confirmed)) %>%
-            select(date, state, confirmed, deaths, death_rate, confirmed_per_100k_inhabitants) 
+            arrange(desc(last_available_confirmed)) %>%
+            select(date, state, last_available_confirmed, last_available_deaths, last_available_death_rate, last_available_confirmed_per_100k_inhabitants) 
         
         datatable(h, options = list(pageLenght = 5)
         ) 
@@ -358,9 +358,9 @@ shinyServer(function(input, output) {
     
     output$progressBox <- renderValueBox({
         hoje <- ymd(input$Date)
-        confirmedDay<-corona %>%
+        confirmedDay<-coronaDeaths %>%
             dplyr::filter(date == hoje) %>%
-            summarise(confirm = sum(deaths))
+            summarise(confirm = sum(last_available_deaths))
         
         valueBox(
             paste0(confirmedDay), "Mortes Confirmadas", 
@@ -384,9 +384,10 @@ shinyServer(function(input, output) {
     
     output$confirmed <- renderValueBox({
         hoje <- ymd(input$Date)
-        confirmed<-corona %>%
-            dplyr::filter(date == hoje) %>%
-            summarise(confirm = sum(confirmed))
+        
+        confirmed<-coronaDeaths %>%
+          dplyr::filter(date==hoje) %>%
+          summarise(confirm = sum(last_available_confirmed))
         
         valueBox(
             paste0(confirmed), "Casos Confirmados",
@@ -396,7 +397,7 @@ shinyServer(function(input, output) {
     
     output$warnmsg <- renderPrint({
       hoje <- ymd(input$Date)
-      confirmed<-corona %>%
+      confirmed<-coronaDeaths %>%
         dplyr::filter(date == hoje)
       
       a<-NROW(confirmed)
@@ -409,7 +410,7 @@ shinyServer(function(input, output) {
     
     output$war <- renderPrint({
       hoje <- ymd(input$Date)
-      confirmed<-corona %>%
+      confirmed<-coronaDeaths %>%
         dplyr::filter(date == hoje)
       
       a<-NROW(confirmed)

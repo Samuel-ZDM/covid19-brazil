@@ -25,7 +25,7 @@ library(DT)
 #install.packages('lubridate')
 library(lubridate)
 
-# Para produzir gráficos interativos
+# Para produzir grÃ¡ficos interativos
 library(ggplot2)
 
 library(plotly)
@@ -72,17 +72,17 @@ dashboardPage(
                       infoBoxOutput("progressBox"),
                       infoBoxOutput("approvalBox"),)),
                   
-                      h1("COVID-19 NO BRASIL", align = "center"),
-                      p("Esta aplicação visa mostrar a evolução e o atual estado do coronavírus no Brasil."),
-                      p("Os dados são obtidos do seguinte dataset:",
-                        tags$a(href="https://brasil.io/home/", "https://brasil.io/home/", style = "color:blue")),
-                      p("Informações sobre o coronavírus no Brasil:",
-                        tags$a(href="https://coronavirus.saude.gov.br", "https://coronavirus.saude.gov.br", style = "color:blue")),
-                      p("Plataforma do Governo com dados bem detalhados sobre infectados, pessoas hospitalizadas e insumos utilizados:",
-                        tags$a(href="https://covid.saude.gov.br", "https://covid.saude.gov.br", style = "color:blue")),
-                       
-                      h4("Os dados podem estar incompletos. Isso depende da atualização do banco de dados."),
-                      h4("Escolha a data no sidebar para verificar a evolução da doença no mapa, na tabela e nos infobox, até a data escolhida.")),
+             h1("COVID-19 NO BRASIL", align = "center"),
+             p("Esta aplicação visa mostrar a evolução e o atual estado do coronavírus no Brasil."),
+             p("Os dados são obtidos do seguinte dataset:",
+               tags$a(href="https://brasil.io/home/", "https://brasil.io/home/", style = "color:blue")),
+             p("Informações sobre o coronavírus no Brasil:",
+               tags$a(href="https://coronavirus.saude.gov.br", "https://coronavirus.saude.gov.br", style = "color:blue")),
+             p("Plataforma do Governo com dados bem detalhados sobre infectados, pessoas hospitalizadas e insumos utilizados:",
+               tags$a(href="https://covid.saude.gov.br", "https://covid.saude.gov.br", style = "color:blue")),
+             
+             h4("Os dados podem estar incompletos. Isso depende da atualização do banco de dados."),
+             h4("Escolha a data no sidebar para verificar a evolução da doença no mapa, na tabela e nos infobox, até a data escolhida.")),
       
      tabItem("total", fluidRow( #textOutput("war"),
                       column(width = 2, offset = 1,
