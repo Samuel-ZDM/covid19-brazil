@@ -67,6 +67,11 @@ corona <- corona %>%
 corona <- corona %>% 
     dplyr::filter(place_type == "state")
 
+#NOVO DATASET, DADOS MAIS RECENTES E ATUALIZADOS, MAIS RÁPIDO
+#ESTOU TENTANDO MUDAR AS VARIÁVEIS PARA ESSE
+#MUDEI OS GRÁFICOS E O MAPA
+
+
 con <- gzcon(url(paste("https://data.brasil.io/dataset/covid19/caso_full.csv.gz", sep="")))
 txt <- readLines(con)
 coronaDeaths <- read.csv(textConnection(txt))
@@ -170,18 +175,19 @@ shinyServer(function(input, output) {
     output$confirPlot <- renderPlotly({
       if(input$graph=="conf")
       {
-        confi<-corona %>%
+        
+        confi<-coronaDeaths %>%
             group_by(date) %>%
-            summarise(confirm = sum(confirmed))
+            summarise(confirm = sum(last_available_confirmed))
         
         a<-NROW(confi)
         #confi$confirm[a]
         if((confi$confirm[a]) < confi$confirm[a-2] )
         {
-            confirmedDe<-corona %>%
+            confirmedDe<-coronaDeaths %>%
                 group_by(date) %>%
                 dplyr::filter(date!=(confi$date[a])) %>%
-                summarise(confirm = sum(confirmed)) %>%
+                summarise(confirm = sum(last_available_confirmed)) %>%
                 ggplot(., aes(x = date, y = confirm), colour = "blue") +
                 geom_line() +
                 labs(x = "Data", y = "Total de Casos Confirmados", colour = "blue") +
@@ -191,9 +197,9 @@ shinyServer(function(input, output) {
             ggplotly()
             
         }else{ 
-            confirmedDe<-corona %>%
+            confirmedDe<-coronaDeaths %>%
                 group_by(date) %>%
-                summarise(confirm = sum(confirmed)) %>%
+                summarise(confirm = sum(last_available_confirmed)) %>%
                 ggplot(., aes(x = date, y = confirm), colour = "blue") +
                 geom_line() +
                 labs(x = "Data", y = "Total de Casos Confirmados", colour = "blue") +
@@ -205,19 +211,19 @@ shinyServer(function(input, output) {
         
       }else if (input$graph=="dea"){
         
-        confi<-corona %>%
+        confi<-coronaDeaths %>%
           group_by(date) %>%
-          summarise(confirm = sum(deaths))
+          summarise(confirm = sum(last_available_deaths))
         
         a<-NROW(confi)
         #confi$confirm[a]
         
         if((confi$confirm[a]) < confi$confirm[a-2] )
         {
-          confirmedDe<-corona %>%
+          confirmedDe<-coronaDeaths %>%
             group_by(date) %>%
             dplyr::filter(date!=(confi$date[a])) %>%
-            summarise(confirm = sum(deaths)) %>%
+            summarise(confirm = sum(last_available_deaths)) %>%
             ggplot(., aes(x = date, y = confirm), colour = "blue") +
             geom_line() +
             labs(x = "Data", y = "Total de Mortos", colour = "blue") +
@@ -227,9 +233,9 @@ shinyServer(function(input, output) {
           ggplotly()
           
         }else{ 
-          confirmedDe<-corona %>%
+          confirmedDe<-coronaDeaths %>%
             group_by(date) %>%
-            summarise(confirm = sum(deaths)) %>%
+            summarise(confirm = sum(last_available_deaths)) %>%
             ggplot(., aes(x = date, y = confirm), colour = "blue") +
             geom_line() +
             labs(x = "Data", y = "Total de Mortos", colour = "blue") +
@@ -265,9 +271,9 @@ shinyServer(function(input, output) {
       #}
       
       if(input$variable == "con100"){
-        h<-corona %>%
+        h<-coronaDeaths %>%
           dplyr::filter(date==hoje) %>%
-          select(confirmed_per_100k_inhabitants, state)
+          select(last_available_confirmed_per_100k_inhabitants, state)
        
         #  n <- "gg"
         #   if(NROW(h) < 27){
@@ -285,14 +291,14 @@ shinyServer(function(input, output) {
         
         pal <- colorNumeric(
           palette = "Paired",
-          domain = h$confirmed_per_100k_inhabitants)
+          domain = h$last_available_confirmed_per_100k_inhabitants)
       
         mapa <- leaflet(h) %>% addTiles()
-        mapa %>% addPolygons(data=shape_br,weight=1,col = ~pal(h$confirmed_per_100k_inhabitants),
+        mapa %>% addPolygons(data=shape_br,weight=1,col = ~pal(h$last_available_confirmed_per_100k_inhabitants),
                       highlightOptions = highlightOptions(color = "blue", weight = 3, bringToFront = TRUE),
-                      label = ~paste(h$state, h$confirmed_per_100k_inhabitants)) %>%
+                      label = ~paste(h$state, h$last_available_confirmed_per_100k_inhabitants)) %>%
   
-                 addLegend("bottomright", pal = pal, values = h$confirmed_per_100k_inhabitants,
+                 addLegend("bottomright", pal = pal, values = h$last_available_confirmed_per_100k_inhabitants,
                             title = "Infec. 100k",
                             #labFormat = labelFormat(prefix = "$"),
                             opacity = 1)
@@ -301,22 +307,22 @@ shinyServer(function(input, output) {
       else if(input$variable == "dea"){
         
         hoje <- ymd(input$Date)
-        h<-corona %>%
+        h<-coronaDeaths %>%
           filter(date==hoje) %>%
-          select(deaths,state)
+          select(last_available_deaths,state)
         
         pal <- colorNumeric(
           palette = "Accent",
-          domain = h$deaths
+          domain = h$last_available_deaths
         )
         
         mapa <- leaflet(h) %>% addTiles()
         mapa %>%
-          addPolygons(data=shape_br,weight=1,col = ~pal(h$deaths),
+          addPolygons(data=shape_br,weight=1,col = ~pal(h$last_available_deaths),
                       highlightOptions = highlightOptions(color = "blue", weight = 3, bringToFront = TRUE),
-                      label = ~paste(h$state, h$deaths)) %>%
+                      label = ~paste(h$state, h$last_available_deaths)) %>%
           
-          addLegend("bottomright", pal = pal, values = h$deaths,
+          addLegend("bottomright", pal = pal, values = h$last_available_deaths,
                     title = "Mortes",
                     #labFormat = labelFormat(prefix = "$"),
                     opacity = 1)
@@ -325,23 +331,24 @@ shinyServer(function(input, output) {
       }else if(input$variable == "conf")
       {
         hoje <- ymd(input$Date)
-        h<-corona %>%
+        
+        h<-coronaDeaths %>%
           filter(date==hoje) %>%
-          select(confirmed,state)
+          select(last_available_confirmed,state)
         
         pal <- colorNumeric(
           palette = "Accent",
-          domain = h$confirmed
+          domain = h$last_available_confirmed
         )
         
         mapa <- leaflet(h) %>% addTiles()
         mapa %>%
-          addPolygons(data=shape_br,weight=1,col = ~pal(h$confirmed),
+          addPolygons(data=shape_br,weight=1,col = ~pal(h$last_available_confirmed),
                       highlightOptions = highlightOptions(color = "blue", weight = 3,
                                                           bringToFront = TRUE),
-                      label = ~paste(h$state, h$confirmed)) %>%
+                      label = ~paste(h$state, h$last_available_confirmed)) %>%
           
-          addLegend("bottomright", pal = pal, values = h$confirmed,
+          addLegend("bottomright", pal = pal, values = h$last_available_confirmed,
                     title = "Confirmados",
                     #labFormat = labelFormat(prefix = "$"),
                     opacity = 1)
@@ -363,25 +370,16 @@ shinyServer(function(input, output) {
     
     output$approvalBox <- renderValueBox({
         hoje <- ymd(input$Date)
-        confirmedDay<-corona %>%
-            dplyr::filter(date == hoje) %>%
-            summarise(confirm = sum(deaths))
         
-        confirmedDay_yes<-corona %>%
-            dplyr::filter(date == (hoje-1)) %>%
-            summarise(confirm = sum(deaths))
-        if((confirmedDay - confirmedDay_yes)<0)
-        {
-           valueBox(
-                paste0("Ind"), "Mortes no dia",
+        confirmedDay<-coronaDeaths %>%
+            dplyr::filter(date == hoje) %>%
+            summarise(confirm =sum(new_deaths))
+        
+              valueBox(
+                paste0(confirmedDay ), "Mortes no dia", 
                 color = "blue"
             )
-        }else{
-            valueBox(
-                paste0(confirmedDay - confirmedDay_yes), "Mortes no dia", 
-                color = "blue"
-            )
-        }
+  
     })
     
     output$confirmed <- renderValueBox({
